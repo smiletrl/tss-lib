@@ -1,4 +1,4 @@
-module github.com/bnb-chain/tss-lib/v2
+module github.com/smiletrl/tss-lib/v2
 
 go 1.16
 
@@ -18,3 +18,5 @@ require (
 )
 
 replace github.com/agl/ed25519 => github.com/binance-chain/edwards25519 v0.0.0-20200305024217-f36fc4b53d43
+
+replace github.com/bnb-chain/tss-lib/v2 v2.0.3 => github.com/smiletrl/tss-lib/v2 v2.0.4

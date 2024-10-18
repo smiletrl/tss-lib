@@ -14,6 +14,7 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/common"
 	cmt "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 	"github.com/bnb-chain/tss-lib/v2/crypto/vss"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 )
 
@@ -35,6 +36,8 @@ type (
 		// outbound messaging
 		out chan<- tss.Message
 		end chan<- *LocalPartySaveData
+
+		logger logger.Logger
 	}
 
 	localMessageStore struct {
