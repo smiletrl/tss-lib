@@ -14,8 +14,8 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/common"
 	cmt "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 	"github.com/bnb-chain/tss-lib/v2/crypto/vss"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
-	"github.com/smiletrl/tss-lib/v2/pkg/logger"
 )
 
 // Implements Party

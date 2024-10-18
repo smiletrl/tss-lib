@@ -16,8 +16,8 @@ import (
 	cmts "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 	"github.com/bnb-chain/tss-lib/v2/crypto/dlnproof"
 	"github.com/bnb-chain/tss-lib/v2/crypto/vss"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
-	"github.com/smiletrl/tss-lib/v2/pkg/logger"
 )
 
 var zero = big.NewInt(0)
