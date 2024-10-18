@@ -11,6 +11,7 @@ import (
 
 	"github.com/bnb-chain/tss-lib/v2/common"
 	"github.com/bnb-chain/tss-lib/v2/tss"
+	"github.com/smiletrl/tss-lib/v2/pkg/logger"
 )
 
 const (
@@ -24,6 +25,7 @@ type (
 		temp    *localTempData
 		out     chan<- tss.Message
 		end     chan<- *LocalPartySaveData
+		logger  logger.Logger
 		ok      []bool // `ok` tracks parties which have been verified by Update()
 		started bool
 		number  int

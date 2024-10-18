@@ -14,8 +14,8 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/common"
 	cmt "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 	"github.com/bnb-chain/tss-lib/v2/crypto/vss"
-	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
+	"github.com/smiletrl/tss-lib/v2/pkg/logger"
 )
 
 // Implements Party
@@ -66,6 +66,7 @@ func NewLocalParty(
 	params *tss.Parameters,
 	out chan<- tss.Message,
 	end chan<- *LocalPartySaveData,
+	log logger.Logger,
 	optionalPreParams ...LocalPreParams,
 ) tss.Party {
 	partyCount := params.PartyCount()
@@ -87,6 +88,7 @@ func NewLocalParty(
 		data:      data,
 		out:       out,
 		end:       end,
+		logger:    log,
 	}
 	// msgs init
 	p.temp.kgRound1Messages = make([]tss.ParsedMessage, partyCount)
@@ -99,7 +101,7 @@ func NewLocalParty(
 }
 
 func (p *LocalParty) FirstRound() tss.Round {
-	return newRound1(p.params, &p.data, &p.temp, p.out, p.end)
+	return newRound1(p.params, &p.data, &p.temp, p.out, p.end, p.logger)
 }
 
 func (p *LocalParty) Start() *tss.Error {
