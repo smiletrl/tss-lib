@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"time"
 
 	"github.com/bnb-chain/tss-lib/v2/common"
 	"github.com/bnb-chain/tss-lib/v2/crypto"
@@ -33,6 +34,8 @@ func (round *round1) Start() *tss.Error {
 	if round.started {
 		return round.WrapError(errors.New("round already started"))
 	}
+	round.logger.Infof("round 1 starts")
+	start := time.Now()
 	round.number = 1
 	round.started = true
 	round.resetOK()
@@ -43,6 +46,8 @@ func (round *round1) Start() *tss.Error {
 	// 1. calculate "partial" key share ui
 	ui := common.GetRandomPositiveInt(round.PartialKeyRand(), round.EC().Params().N)
 
+	round.logger.Infof("round 1 after getting ui taking: %d milliseconds", time.Since(start).Milliseconds())
+
 	round.temp.ui = ui
 
 	// 2. compute the vss shares
@@ -52,6 +57,7 @@ func (round *round1) Start() *tss.Error {
 		return round.WrapError(err, Pi)
 	}
 	round.save.Ks = ids
+	round.logger.Infof("round 1 after vss creating taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// security: the original u_i may be discarded
 	ui = zero // clears the secret data from memory
@@ -63,6 +69,7 @@ func (round *round1) Start() *tss.Error {
 		return round.WrapError(err, Pi)
 	}
 	cmt := cmts.NewHashCommitment(round.Rand(), pGFlat...)
+	round.logger.Infof("round 1 after vss cmt hashing taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// 4. generate Paillier public key E_i, private key and proof
 	// 5-7. generate safe primes for ZKPs used later on
@@ -76,12 +83,15 @@ func (round *round1) Start() *tss.Error {
 		preParams = &round.save.LocalPreParams
 	} else {
 		{
+
+			round.logger.Infof("round 1 generating preparms taking: %d milliseconds - should never happen!", time.Since(start).Milliseconds())
 			ctx, cancel := context.WithTimeout(context.Background(), round.SafePrimeGenTimeout())
 			defer cancel()
 			preParams, err = GeneratePreParamsWithContextAndRandom(ctx, round.Rand(), round.Concurrency())
 			if err != nil {
 				return round.WrapError(errors.New("pre-params generation failed"), Pi)
 			}
+			round.logger.Infof("round 1 generating preparms done taking: %d milliseconds - should never happen!", time.Since(start).Milliseconds())
 		}
 	}
 	round.save.LocalPreParams = *preParams
@@ -118,6 +128,7 @@ func (round *round1) Start() *tss.Error {
 	round.save.PaillierSK = preParams.PaillierSK
 	round.save.PaillierPKs[i] = &preParams.PaillierSK.PublicKey
 	round.temp.deCommitPolyG = cmt.D
+	round.logger.Infof("round 1 before generating message taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// BROADCAST commitments, paillier pk + proof; round 1 message
 	{
@@ -129,6 +140,7 @@ func (round *round1) Start() *tss.Error {
 		round.temp.kgRound1Messages[i] = msg
 		round.out <- msg
 	}
+	round.logger.Infof("round 1 completes taking: %d milliseconds", time.Since(start).Milliseconds())
 	return nil
 }
 

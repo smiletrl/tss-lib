@@ -11,6 +11,7 @@ import (
 	"errors"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/bnb-chain/tss-lib/v2/crypto/facproof"
 	"github.com/bnb-chain/tss-lib/v2/crypto/modproof"
@@ -27,6 +28,8 @@ func (round *round2) Start() *tss.Error {
 	if round.started {
 		return round.WrapError(errors.New("round already started"))
 	}
+	round.logger.Infof("round 2 starts with concurrency: %d", round.Concurrency())
+	start := time.Now()
 	round.number = 2
 	round.started = true
 	round.resetOK()
@@ -87,6 +90,7 @@ func (round *round2) Start() *tss.Error {
 		})
 	}
 	wg.Wait()
+	round.logger.Infof("round 2 after DlnProofVerifier taking: %d milliseconds", time.Since(start).Milliseconds())
 	for _, culprit := range append(dlnProof1FailCulprits, dlnProof2FailCulprits...) {
 		if culprit != nil {
 			return round.WrapError(errors.New("dln proof verification failed"), culprit)
@@ -112,6 +116,8 @@ func (round *round2) Start() *tss.Error {
 	// 5. p2p send share ij to Pj
 	shares := round.temp.shares
 	ContextI := append(round.temp.ssid, big.NewInt(int64(i)).Bytes()...)
+
+	round.logger.Infof("round 2 before facproof taking: %d milliseconds", time.Since(start).Milliseconds())
 	for j, Pj := range round.Parties().IDs() {
 
 		facProof := &facproof.ProofFac{
@@ -120,11 +126,15 @@ func (round *round2) Start() *tss.Error {
 		}
 		if !round.Params().NoProofFac() {
 			var err error
+			start2 := time.Now()
 			facProof, err = facproof.NewProof(ContextI, round.EC(), round.save.PaillierSK.N, round.save.NTildej[j],
 				round.save.H1j[j], round.save.H2j[j], round.save.PaillierSK.P, round.save.PaillierSK.Q, round.Rand())
 			if err != nil {
 				return round.WrapError(err, round.PartyID())
 			}
+
+			round.logger.Infof("round 2 each facproof for iteration inner: %d, taking: %d milliseconds", j, time.Since(start2).Milliseconds())
+			round.logger.Infof("round 2 after facproof for iteration no inner: %d, taking: %d milliseconds", j, time.Since(start).Milliseconds())
 
 		}
 		r2msg1 := NewKGRound2Message1(Pj, round.PartyID(), shares[j], facProof)
@@ -135,6 +145,8 @@ func (round *round2) Start() *tss.Error {
 		}
 		round.out <- r2msg1
 	}
+
+	round.logger.Infof("round 2 after facproof done, taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// 7. BROADCAST de-commitments of Shamir poly*G
 	modProof := &modproof.ProofMod{W: zero, X: *new([80]*big.Int), A: zero, B: zero, Z: *new([80]*big.Int)}
@@ -149,6 +161,8 @@ func (round *round2) Start() *tss.Error {
 	r2msg2 := NewKGRound2Message2(round.PartyID(), round.temp.deCommitPolyG, modProof)
 	round.temp.kgRound2Message2s[i] = r2msg2
 	round.out <- r2msg2
+
+	round.logger.Infof("round 2 completes, taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	return nil
 }

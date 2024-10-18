@@ -8,6 +8,7 @@ package keygen
 
 import (
 	"errors"
+	"time"
 
 	"github.com/bnb-chain/tss-lib/v2/common"
 	"github.com/bnb-chain/tss-lib/v2/crypto/paillier"
@@ -18,6 +19,8 @@ func (round *round4) Start() *tss.Error {
 	if round.started {
 		return round.WrapError(errors.New("round already started"))
 	}
+	round.logger.Infof("round 4 starts")
+	start := time.Now()
 	round.number = 4
 	round.started = true
 	round.resetOK()
@@ -40,6 +43,7 @@ func (round *round4) Start() *tss.Error {
 		}
 		r3msg := msg.Content().(*KGRound3Message)
 		go func(prf paillier.Proof, j int, ch chan<- bool) {
+			start2 := time.Now()
 			ppk := round.save.PaillierPKs[j]
 			ok, err := prf.Verify(ppk.N, PIDs[j], ecdsaPub)
 			if err != nil {
@@ -48,6 +52,7 @@ func (round *round4) Start() *tss.Error {
 				return
 			}
 			ch <- ok
+			round.logger.Infof("round 4 after paillier proof, taking: %d milliseconds", time.Since(start2).Milliseconds())
 		}(r3msg.UnmarshalProofInts(), j, chs[j])
 	}
 
@@ -75,6 +80,7 @@ func (round *round4) Start() *tss.Error {
 
 	round.end <- round.save
 
+	round.logger.Infof("round 4 completes, taking: %d milliseconds", time.Since(start).Milliseconds())
 	return nil
 }
 

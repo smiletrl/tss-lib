@@ -9,6 +9,7 @@ package keygen
 import (
 	"errors"
 	"math/big"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	errors2 "github.com/pkg/errors"
@@ -24,6 +25,8 @@ func (round *round3) Start() *tss.Error {
 	if round.started {
 		return round.WrapError(errors.New("round already started"))
 	}
+	round.logger.Infof("round 3 starts with concurrency: %d", round.Concurrency())
+	start := time.Now()
 	round.number = 3
 	round.started = true
 	round.resetOK()
@@ -42,6 +45,8 @@ func (round *round3) Start() *tss.Error {
 		xi = new(big.Int).Add(xi, share)
 	}
 	round.save.Xi = new(big.Int).Mod(xi, round.Params().EC().Params().N)
+
+	round.logger.Infof("round 3 after cal Xi taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// 2-3.
 	Vc := make(vss.Vs, round.Threshold()+1)
@@ -68,6 +73,7 @@ func (round *round3) Start() *tss.Error {
 		ContextJ := common.AppendBigIntToBytesSlice(round.temp.ssid, big.NewInt(int64(j)))
 		// 6-8.
 		go func(j int, ch chan<- vssOut) {
+			start2 := time.Now()
 			// 4-9.
 			KGCj := round.temp.KGCs[j]
 			r2msg2 := round.temp.kgRound2Message2s[j].Content().(*KGRound2Message2)
@@ -108,6 +114,8 @@ func (round *round3) Start() *tss.Error {
 				ch <- vssOut{errors.New("vss verify failed"), nil}
 				return
 			}
+
+			round.logger.Infof("round 3 after Pj share Verify iteration: %d, taking: %d milliseconds", j, time.Since(start2).Milliseconds())
 			facProof, err := r2msg1.UnmarshalFacProof()
 			if err != nil && round.NoProofFac() {
 				// For old parties, the facProof could be not exist
@@ -123,6 +131,7 @@ func (round *round3) Start() *tss.Error {
 					ch <- vssOut{errors.New("facProof verify failed"), nil}
 					return
 				}
+				round.logger.Infof("round 3 after facproof Verify iteration: %d, taking: %d milliseconds", j, time.Since(start2).Milliseconds())
 			}
 
 			// (9) handled above
@@ -154,6 +163,9 @@ func (round *round3) Start() *tss.Error {
 			return round.WrapError(multiErr, culprits...)
 		}
 	}
+
+	round.logger.Infof("round 3 after facProof Verify done, taking: %d milliseconds", time.Since(start).Milliseconds())
+
 	{
 		var err error
 		culprits := make([]*tss.PartyID, 0, len(Ps)) // who caused the error(s)
@@ -201,6 +213,8 @@ func (round *round3) Start() *tss.Error {
 		round.save.BigXj = bigXj
 	}
 
+	round.logger.Infof("round 3 after BigXj done, taking: %d milliseconds", time.Since(start).Milliseconds())
+
 	// 17. compute and SAVE the ECDSA public key `y`
 	ecdsaPubKey, err := crypto.NewECPoint(round.Params().EC(), Vc[0].X(), Vc[0].Y())
 	if err != nil {
@@ -217,6 +231,8 @@ func (round *round3) Start() *tss.Error {
 	r3msg := NewKGRound3Message(round.PartyID(), proof)
 	round.temp.kgRound3Messages[PIdx] = r3msg
 	round.out <- r3msg
+
+	round.logger.Infof("round 3 completes, taking: %d milliseconds", time.Since(start).Milliseconds())
 	return nil
 }
 

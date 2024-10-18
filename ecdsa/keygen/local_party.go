@@ -90,6 +90,8 @@ func NewLocalParty(
 		end:       end,
 		logger:    log,
 	}
+	p.BaseParty.SetLogger(log)
+
 	// msgs init
 	p.temp.kgRound1Messages = make([]tss.ParsedMessage, partyCount)
 	p.temp.kgRound2Message1s = make([]tss.ParsedMessage, partyCount)

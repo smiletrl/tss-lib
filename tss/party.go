@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/bnb-chain/tss-lib/v2/common"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 )
 
 type Party interface {
@@ -36,16 +37,26 @@ type Party interface {
 	advance()
 	lock()
 	unlock()
+	Logger() logger.Logger
 }
 
 type BaseParty struct {
 	mtx        sync.Mutex
 	rnd        Round
 	FirstRound Round
+	logger     logger.Logger
 }
 
 func (p *BaseParty) Running() bool {
 	return p.rnd != nil
+}
+
+func (p *BaseParty) Logger() logger.Logger {
+	return p.logger
+}
+
+func (p *BaseParty) SetLogger(l logger.Logger) {
+	p.logger = l
 }
 
 func (p *BaseParty) WaitingFor() []*PartyID {
@@ -137,8 +148,10 @@ func BaseStart(p Party, task string, prepare ...func(Round) *Error) *Error {
 		}
 	}
 	common.Logger.Infof("party %s: %s round %d starting", p.round().Params().PartyID(), task, 1)
+	p.Logger().Infof("party %s: %s round %d starting", p.round().Params().PartyID(), task, 1)
 	defer func() {
 		common.Logger.Debugf("party %s: %s round %d finished", p.round().Params().PartyID(), task, 1)
+		p.Logger().Infof("party %s: %s round %d finished", p.round().Params().PartyID(), task, 1)
 	}()
 	return p.round().Start()
 }
@@ -154,7 +167,9 @@ func BaseUpdate(p Party, msg ParsedMessage, task string) (ok bool, err *Error) {
 		p.unlock()
 		return ok, err
 	}
+	p.Logger().Infof("party received message before lock: %s, message: %s", p.PartyID(), msg.String())
 	p.lock() // data is written to P state below
+	p.Logger().Infof("party received message after lock: %s, message: %s", p.PartyID(), msg.String())
 	common.Logger.Debugf("party %s received message: %s", p.PartyID(), msg.String())
 	if p.round() != nil {
 		common.Logger.Debugf("party %s round %d update: %s", p.PartyID(), p.round().RoundNumber(), msg.String())
