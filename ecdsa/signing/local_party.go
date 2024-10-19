@@ -16,6 +16,7 @@ import (
 	cmt "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 	"github.com/bnb-chain/tss-lib/v2/crypto/mta"
 	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 )
 
@@ -36,8 +37,9 @@ type (
 		data *common.SignatureData
 
 		// outbound messaging
-		out chan<- tss.Message
-		end chan<- *common.SignatureData
+		out    chan<- tss.Message
+		end    chan<- *common.SignatureData
+		logger logger.Logger
 	}
 
 	localMessageStore struct {
@@ -106,8 +108,9 @@ func NewLocalParty(
 	key keygen.LocalPartySaveData,
 	out chan<- tss.Message,
 	end chan<- *common.SignatureData,
+	log logger.Logger,
 	fullBytesLen ...int) tss.Party {
-	return NewLocalPartyWithKDD(msg, params, key, nil, out, end, fullBytesLen...)
+	return NewLocalPartyWithKDD(msg, params, key, nil, out, end, log, fullBytesLen...)
 }
 
 // NewLocalPartyWithKDD returns a party with key derivation delta for HD support
@@ -118,6 +121,7 @@ func NewLocalPartyWithKDD(
 	keyDerivationDelta *big.Int,
 	out chan<- tss.Message,
 	end chan<- *common.SignatureData,
+	log logger.Logger,
 	fullBytesLen ...int,
 ) tss.Party {
 	partyCount := len(params.Parties().IDs())
@@ -129,6 +133,7 @@ func NewLocalPartyWithKDD(
 		data:      &common.SignatureData{},
 		out:       out,
 		end:       end,
+		logger:    log,
 	}
 	// msgs init
 	p.temp.signRound1Message1s = make([]tss.ParsedMessage, partyCount)
@@ -161,7 +166,7 @@ func NewLocalPartyWithKDD(
 }
 
 func (p *LocalParty) FirstRound() tss.Round {
-	return newRound1(p.params, &p.keys, p.data, &p.temp, p.out, p.end)
+	return newRound1(p.params, &p.keys, p.data, &p.temp, p.out, p.end, p.logger)
 }
 
 func (p *LocalParty) Start() *tss.Error {

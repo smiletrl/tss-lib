@@ -13,6 +13,7 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/common"
 	"github.com/bnb-chain/tss-lib/v2/crypto"
 	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
+	"github.com/bnb-chain/tss-lib/v2/pkg/logger"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 )
 
@@ -28,6 +29,7 @@ type (
 		temp    *localTempData
 		out     chan<- tss.Message
 		end     chan<- *common.SignatureData
+		logger  logger.Logger
 		ok      []bool // `ok` tracks parties which have been verified by Update()
 		started bool
 		number  int
