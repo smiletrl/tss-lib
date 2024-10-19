@@ -140,7 +140,26 @@ func (round *round1) Start() *tss.Error {
 		round.temp.kgRound1Messages[i] = msg
 		round.out <- msg
 	}
-	round.logger.Infof("round 1 completes taking: %d milliseconds", time.Since(start).Milliseconds())
+	spent := time.Since(start).Milliseconds()
+
+	// 10 seconds
+	if spent > 10000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 10 seconds", time.Since(start).Milliseconds())
+	} else if spent > 7000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 7 seconds", time.Since(start).Milliseconds())
+	} else if spent > 4000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 4 seconds", time.Since(start).Milliseconds())
+	} else if spent > 3000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 3 seconds", time.Since(start).Milliseconds())
+	} else if spent > 2000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 2 seconds", time.Since(start).Milliseconds())
+	} else if spent > 1000 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds over 1 seconds", time.Since(start).Milliseconds())
+	} else if spent > 500 {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds under 1 second but above 0.5 second", time.Since(start).Milliseconds())
+	} else {
+		round.logger.Infof("round 1 completes, taking: %d milliseconds under 1 second and under 0.5 second", time.Since(start).Milliseconds())
+	}
 	return nil
 }
 

@@ -104,8 +104,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
-github.com/smiletrl/tss-lib/v2 v2.0.8 h1:oasm33uKlfP/dI/ZT/ALuISsIUQ228BW6/mSE65FhN0=
-github.com/smiletrl/tss-lib/v2 v2.0.8/go.mod h1:HeZmvuwS29KsJFt3nog1mEVOUsU3U6AuSc4I9C87gHg=
+github.com/smiletrl/tss-lib/v2 v2.0.10 h1:iiG+sEMQsFmNCOzskxi0mEJ9I77leOJ5h6y/yktGTcU=
+github.com/smiletrl/tss-lib/v2 v2.0.10/go.mod h1:B0/yZkz7m0yQENyDfkoaOakdWh1BBXdhR7Iu7+84kFc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
