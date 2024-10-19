@@ -135,6 +135,7 @@ func NewLocalPartyWithKDD(
 		end:       end,
 		logger:    log,
 	}
+	p.BaseParty.SetLogger(log)
 	// msgs init
 	p.temp.signRound1Message1s = make([]tss.ParsedMessage, partyCount)
 	p.temp.signRound1Message2s = make([]tss.ParsedMessage, partyCount)
