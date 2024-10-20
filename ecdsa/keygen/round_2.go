@@ -149,7 +149,7 @@ func (round *round2) Start() *tss.Error {
 	round.logger.Infof("round 2 after facproof done, taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// 7. BROADCAST de-commitments of Shamir poly*G
-	modProof := &modproof.ProofMod{W: zero, X: *new([80]*big.Int), A: zero, B: zero, Z: *new([80]*big.Int)}
+	modProof := &modproof.ProofMod{W: zero, X: *new([modproof.Iterations]*big.Int), A: zero, B: zero, Z: *new([modproof.Iterations]*big.Int)}
 	if !round.Parameters.NoProofMod() {
 		var err error
 		modProof, err = modproof.NewProof(ContextI, round.save.PaillierSK.N,

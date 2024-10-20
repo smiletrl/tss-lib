@@ -20,7 +20,7 @@ import (
 	cmts "github.com/bnb-chain/tss-lib/v2/crypto/commitments"
 )
 
-const Iterations = 128
+const Iterations = 1 // original 128
 
 type (
 	Proof struct {

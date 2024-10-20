@@ -107,7 +107,9 @@ func (round *round1) Start() *tss.Error {
 		preParams.Q,
 		preParams.NTildei
 	dlnProof1 := dlnproof.NewDLNProof(h1i, h2i, alpha, p, q, NTildei, round.Rand())
+	round.logger.Infof("round 1 after DLN one taking: %d milliseconds", time.Since(start).Milliseconds())
 	dlnProof2 := dlnproof.NewDLNProof(h2i, h1i, beta, p, q, NTildei, round.Rand())
+	round.logger.Infof("round 1 after DLN two taking: %d milliseconds", time.Since(start).Milliseconds())
 
 	// for this P: SAVE
 	// - shareID

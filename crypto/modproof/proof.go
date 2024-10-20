@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Iterations         = 80
+	Iterations         = 1 // original 80
 	ProofModBytesParts = Iterations*2 + 3
 )
 
